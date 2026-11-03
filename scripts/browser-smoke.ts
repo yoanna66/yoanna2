@@ -35,11 +35,13 @@ async function main() {
       await page
         .getByLabel("時段 1 開始時間日期", { exact: true })
         .fill("2026-12-01");
-      await page.getByLabel("時段 1 開始時間時刻").fill("18:00");
+      await page.getByLabel("時段 1 開始時間小時").selectOption("18");
+      await page.getByLabel("時段 1 開始時間分鐘").selectOption("00");
       await page
         .getByLabel("時段 1 結束時間日期", { exact: true })
         .fill("2026-12-01");
-      await page.getByLabel("時段 1 結束時間時刻").fill("20:00");
+      await page.getByLabel("時段 1 結束時間小時").selectOption("20");
+      await page.getByLabel("時段 1 結束時間分鐘").selectOption("00");
       await page
         .getByRole("button", { name: "選擇時段 1 開始時間日期" })
         .click();
@@ -54,7 +56,7 @@ async function main() {
         "2027-01-02",
       );
       await page.getByRole("button", { name: "新增候選時段" }).click();
-      assert.equal(await page.locator('input[type="time"]').count(), 4);
+      assert.equal(await page.locator(".time-fields select").count(), 8);
       await page.getByRole("button", { name: "移除時段 2" }).click();
       assert.equal(
         await page.evaluate(
@@ -63,6 +65,16 @@ async function main() {
         true,
         `create overflow at ${width}`,
       );
+      const dimensions = await page
+        .locator(".time-fields")
+        .first()
+        .locator("select")
+        .evaluateAll((nodes) => nodes.map((n) => n.getBoundingClientRect()));
+      assert.ok(
+        Math.abs(dimensions[0].width - dimensions[1].width) < 1,
+        "hour and minute widths match",
+      );
+      assert.equal(dimensions[0].height, dimensions[1].height);
       await page.screenshot({
         path: `/tmp/ju-time-create-${width}.png`,
         fullPage: true,

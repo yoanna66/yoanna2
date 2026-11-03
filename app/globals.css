@@ -830,9 +830,6 @@ footer small {
   grid-template-columns: minmax(100px, 1fr) 34px;
   gap: 5px;
 }
-.datetime-fields input[type="time"] {
-  grid-column: 1/-1;
-}
 .datetime-fields input {
   font-size: 13px;
   padding: 9px;
@@ -919,4 +916,40 @@ footer small {
   }
 }
 
-@media(max-width:700px){.slot-input > .datetime-picker{grid-column:1}}
+@media (max-width: 700px) {
+  .slot-input > .datetime-picker {
+    grid-column: 1;
+  }
+}
+
+.time-fields {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 12px minmax(0, 1fr);
+  gap: 6px;
+  align-items: center;
+  text-align: center;
+}
+.time-fields select {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 8px 10px;
+  border: 1px solid #d8e4eb;
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  text-align-last: center;
+}
+.time-fields select:focus-visible {
+  outline: 3px solid #287bda25;
+  border-color: var(--blue);
+}
+.time-fields > span {
+  font-size: 16px;
+  color: var(--muted);
+}

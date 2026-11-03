@@ -12,6 +12,7 @@ export function DateTimePicker({
   onChange: (value: string) => void;
 }) {
   const [date = "", time = ""] = value.split("T");
+  const [hour = "", minute = ""] = time.split(":");
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState(() => {
     const d = new Date();
@@ -76,13 +77,47 @@ export function DateTimePicker({
         >
           <CalendarDays size={18} />
         </button>
-        <input
-          aria-label={`${label}時刻`}
-          type="time"
-          required
-          value={time}
-          onChange={(e) => onChange(`${date}T${e.target.value}`)}
-        />
+        <div
+          className="time-fields"
+          role="group"
+          aria-label={`${label}時刻（24 小時制）`}
+        >
+          <select
+            aria-label={`${label}小時`}
+            required
+            value={hour}
+            onChange={(e) =>
+              onChange(`${date}T${e.target.value}:${minute || "00"}`)
+            }
+          >
+            <option value="" disabled>
+              時
+            </option>
+            {Array.from({ length: 24 }, (_, i) => (
+              <option key={i} value={pad(i)}>
+                {pad(i)}
+              </option>
+            ))}
+          </select>
+          <span aria-hidden="true">:</span>
+          <select
+            aria-label={`${label}分鐘`}
+            required
+            value={minute}
+            onChange={(e) =>
+              onChange(`${date}T${hour || "00"}:${e.target.value}`)
+            }
+          >
+            <option value="" disabled>
+              分
+            </option>
+            {Array.from({ length: 60 }, (_, i) => (
+              <option key={i} value={pad(i)}>
+                {pad(i)}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
       {open && (
         <div
