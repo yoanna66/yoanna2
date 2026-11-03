@@ -99,3 +99,9 @@ CHROMIUM_PATH=/usr/bin/chromium npm run test:browser
 ## 目前驗證範圍
 
 測試報告以交付訊息為準。未提供真實 Supabase 專案/伺服器憑證前，不宣稱遠端持久化、PostgREST 或 Vercel 部署已經驗證。網站不會自動建立 Supabase 專案或套用遠端 migration。
+
+### 同一瀏覽器返回填寫頁
+
+提交成功或成功使用私人修改連結後，瀏覽器會以活動代碼分開保存修改憑證（localStorage），返回「填寫時間」會使用憑證從資料庫載入原答案，更新同一筆紀錄。明確開啟的 `#edit=` 連結優先於本機記錄。載入失敗時不會自動建立新答案。清除網站資料、換裝置或瀏覽器阻擋儲存時，仍須使用保存的私人修改連結；共用電腦請使用無痕視窗。此設計不代表免登入可驗證身分或完全防止重複填寫。
+
+開發者可在啟動網站後執行 `npx tsx scripts/response-regression.ts`，驗證返回填寫頁、重新整理與更新不新增紀錄。本測試使用隔離的 API fixture，並非遠端 Supabase 驗證。

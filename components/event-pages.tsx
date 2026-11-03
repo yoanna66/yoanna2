@@ -86,22 +86,47 @@ export function Respond({ code }: { code: string }) {
     [loadingEdit, setLoadingEdit] = useState(false),
     [editError, setEditError] = useState(false);
   useEffect(() => {
-    const t = new URLSearchParams(location.hash.slice(1)).get("edit");
+    let active = true;
+    const explicit = new URLSearchParams(location.hash.slice(1)).get("edit");
+    let remembered: string | null = null;
+    try {
+      remembered = localStorage.getItem(`ju-time:response:${code}`);
+    } catch {
+      /* Private browsing can disable storage. */
+    }
+    const t = explicit || remembered;
+    setSaved("");
+    setMessage("");
+    setEditError(false);
+    setNickname("");
+    setChoices([]);
+    setEdit(!!t);
+    setToken(t || randomToken());
+    setLoadingEdit(!!t);
     if (t) {
-      setEdit(true);
-      setToken(t);
-      setLoadingEdit(true);
       api(`/api/events/${code}`, { action: "load", token: t })
         .then((d) => {
+          if (!active) return;
           setNickname(d.nickname);
           setChoices(d.choices);
+          try {
+            localStorage.setItem(`ju-time:response:${code}`, t);
+          } catch {
+            /* The private link remains available. */
+          }
         })
         .catch((e) => {
+          if (!active) return;
           setMessage(e.message);
           setEditError(true);
         })
-        .finally(() => setLoadingEdit(false));
-    } else setToken(randomToken());
+        .finally(() => {
+          if (active) setLoadingEdit(false);
+        });
+    }
+    return () => {
+      active = false;
+    };
   }, [code]);
   if (!data) return <LoadState error={error} />;
   return (
@@ -118,7 +143,7 @@ export function Respond({ code }: { code: string }) {
         <section className="panel">
           <h2>你的時間，收到了！</h2>
           <p className="muted">
-            請保存下方專屬修改連結。之後用它更新同一筆答案，不會新增紀錄。
+            此瀏覽器會嘗試記住你的答案憑證，返回「填寫時間」即可修改原紀錄。請仍保存下方修改連結，供其他裝置或清除瀏覽資料後使用。共用電腦請使用無痕視窗。
           </p>
           <Copy label="複製修改連結" value={saved} />
           <div className="actions">
@@ -146,6 +171,11 @@ export function Respond({ code }: { code: string }) {
               });
               const url = `${location.origin}/events/${code}/respond#edit=${token}`;
               history.replaceState(null, "", url);
+              try {
+                localStorage.setItem(`ju-time:response:${code}`, token);
+              } catch {
+                /* Always offer the private link if storage is unavailable. */
+              }
               setEdit(true);
               setSaved(url);
             } catch (e) {
