@@ -32,13 +32,29 @@ async function main() {
       await page.getByRole("link", { name: "建立一個活動" }).click();
       await page.getByLabel("活動名稱").fill("週末聚餐");
       await page.getByLabel("發起人暱稱").fill("小明");
-      await page.getByLabel("時段 1 開始時間").fill("2026-12-01T18:00");
-      await page.getByLabel("時段 1 結束時間").fill("2026-12-01T20:00");
-      await page.getByRole("button", { name: "新增候選時段" }).click();
+      await page
+        .getByLabel("時段 1 開始時間日期", { exact: true })
+        .fill("2026-12-01");
+      await page.getByLabel("時段 1 開始時間時刻").fill("18:00");
+      await page
+        .getByLabel("時段 1 結束時間日期", { exact: true })
+        .fill("2026-12-01");
+      await page.getByLabel("時段 1 結束時間時刻").fill("20:00");
+      await page
+        .getByRole("button", { name: "選擇時段 1 開始時間日期" })
+        .click();
+      await page.getByRole("button", { name: "下一個月" }).click();
+      await page
+        .getByRole("button", { name: "2027-01-02", exact: true })
+        .click();
       assert.equal(
-        await page.locator('input[type="datetime-local"]').count(),
-        4,
+        await page
+          .getByLabel("時段 1 開始時間日期", { exact: true })
+          .inputValue(),
+        "2027-01-02",
       );
+      await page.getByRole("button", { name: "新增候選時段" }).click();
+      assert.equal(await page.locator('input[type="time"]').count(), 4);
       await page.getByRole("button", { name: "移除時段 2" }).click();
       assert.equal(
         await page.evaluate(

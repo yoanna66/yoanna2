@@ -89,8 +89,11 @@ export function Respond({ code }: { code: string }) {
     let active = true;
     const explicit = new URLSearchParams(location.hash.slice(1)).get("edit");
     let remembered: string | null = null;
+    let organizerNickname = "";
     try {
       remembered = localStorage.getItem(`ju-time:response:${code}`);
+      organizerNickname =
+        localStorage.getItem(`ju-time:organizer:${code}`) || "";
     } catch {
       /* Private browsing can disable storage. */
     }
@@ -98,7 +101,7 @@ export function Respond({ code }: { code: string }) {
     setSaved("");
     setMessage("");
     setEditError(false);
-    setNickname("");
+    setNickname(t ? "" : organizerNickname);
     setChoices([]);
     setEdit(!!t);
     setToken(t || randomToken());

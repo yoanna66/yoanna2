@@ -62,8 +62,17 @@ async function main() {
     };
     await context.route("**/api/events/*", handler);
     const base = process.env.TEST_BASE_URL || "http://127.0.0.1:3000";
-    await page.goto(`${base}/events/${code}/respond`);
-    await page.getByLabel("你的暱稱").fill("小明");
+    await context.route("**/api/events", route => route.fulfill({status:201,json:{code,token:"a".repeat(64)}}));
+    await page.goto(`${base}/create`);
+    await page.getByLabel("活動名稱").fill("發起人自動帶入測試");
+    await page.getByLabel("發起人暱稱").fill("小明");
+    for (const kind of ["開始", "結束"]) {
+      await page.getByLabel(`時段 1 ${kind}時間日期`, {exact:true}).fill("2030-01-01");
+      await page.getByLabel(`時段 1 ${kind}時間時刻`).fill(kind === "開始" ? "10:00" : "11:00");
+    }
+    await page.getByRole("button", {name:"建立活動，邀請朋友"}).click();
+    await page.getByRole("link", {name:"先填寫我的時間"}).click();
+    await page.waitForFunction(() => (document.querySelector('input[maxlength="40"]') as HTMLInputElement)?.value === "小明");
     await page.locator("input[type=checkbox]").check();
     await page.getByRole("button", { name: "提交我的時間" }).click();
     await page.getByRole("heading", { name: "你的時間，收到了！" }).waitFor();

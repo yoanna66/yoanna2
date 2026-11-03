@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Plus, Trash2, ArrowRight } from "lucide-react";
+import { DateTimePicker } from "@/components/date-time-picker";
 import { api } from "@/components/shared";
 export default function Create() {
   const [slots, setSlots] = useState([{ start: "", end: "" }]),
@@ -39,6 +40,14 @@ export default function Create() {
                 end: s.end + ":00+08:00",
               })),
             });
+            try {
+              localStorage.setItem(
+                `ju-time:organizer:${data.code}`,
+                String(form.get("organizer") || "").trim(),
+              );
+            } catch {
+              /* The participant may still type their nickname manually. */
+            }
             location.assign(`/events/${data.code}/invite#admin=${data.token}`);
           } catch (e) {
             setError((e as Error).message);
@@ -75,22 +84,18 @@ export default function Create() {
           {slots.map((s, i) => (
             <div className="slot-input" key={i}>
               {(["start", "end"] as const).map((key) => (
-                <label key={key}>
-                  {key === "start" ? "開始時間" : "結束時間"}
-                  <input
-                    type="datetime-local"
-                    aria-label={`時段 ${i + 1} ${key === "start" ? "開始" : "結束"}時間`}
-                    required
-                    value={s[key]}
-                    onChange={(e) =>
-                      setSlots(
-                        slots.map((x, j) =>
-                          j === i ? { ...x, [key]: e.target.value } : x,
-                        ),
-                      )
-                    }
-                  />
-                </label>
+                <DateTimePicker
+                  key={key}
+                  label={`時段 ${i + 1} ${key === "start" ? "開始" : "結束"}時間`}
+                  value={s[key]}
+                  onChange={(value) =>
+                    setSlots(
+                      slots.map((x, j) =>
+                        j === i ? { ...x, [key]: value } : x,
+                      ),
+                    )
+                  }
+                />
               ))}
               <button
                 type="button"
